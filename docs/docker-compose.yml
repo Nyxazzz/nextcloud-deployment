@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb:10.5
+    restart: always
+    container_name: nextcloud-db
+    volumes:
+      - /srv/nextcloud/db:/var/lib/mysql
+    environment:
+     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      - MYSQL_ROOT_PASSWORD=admin
+      - MYSQL_PASSWORD=admin
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+
+  app:
+    image: nextcloud
+    restart: always
+    container_name: nextcloud
+    ports:
+      - 8080:80
+    volumes:
+      - /srv/nextcloud/data:/var/www/html
+    depends_on:
+      - db
+    environment:
+    /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      - MYSQL_PASSWORD=admin
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
