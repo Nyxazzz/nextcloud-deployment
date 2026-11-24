@@ -1,34 +1,56 @@
+# =====================================================================
+#  Nextcloud + MariaDB con Docker Compose
+#  Documentación: docs/instalacion.md
+#
+#  Uso:
+#    docker compose up -d        # Levantar el servicio
+#    docker compose ps           # Ver el estado de los contenedores
+#    docker compose logs -f      # Ver los logs en tiempo real
+#    docker compose down         # Parar el servicio (los datos se conservan)
+# =====================================================================
+
 version: '3'
 
 services:
+  # -------------------------------------------------------------------
+  #  Base de datos (MariaDB)
+  # -------------------------------------------------------------------
   db:
     image: mariadb:10.5
     restart: always
     container_name: nextcloud-db
+    # Parámetros recomendados por Nextcloud para MariaDB
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - /srv/nextcloud/db:/var/lib/mysql
     environment:
-     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      # ///// ESTE APARTADO SE DEBE CAMBIAR A SU GUSTO /////
       - MYSQL_ROOT_PASSWORD=admin
       - MYSQL_PASSWORD=admin
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      # ///// ESTE APARTADO SE DEBE CAMBIAR A SU GUSTO /////
 
+  # -------------------------------------------------------------------
+  #  Aplicación (Nextcloud con Apache)
+  # -------------------------------------------------------------------
   app:
     image: nextcloud
     restart: always
     container_name: nextcloud
     ports:
+      # Si usas un proxy inverso en el mismo servidor (ver docs/seguridad.md),
+      # cambia esta línea por "127.0.0.1:8080:80" para no exponer el puerto 8080.
       - 8080:80
     volumes:
       - /srv/nextcloud/data:/var/www/html
     depends_on:
       - db
     environment:
-    /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      # ///// ESTE APARTADO SE DEBE CAMBIAR A SU GUSTO /////
+      # MYSQL_PASSWORD, MYSQL_DATABASE y MYSQL_USER deben coincidir con los del servicio "db"
       - MYSQL_PASSWORD=admin
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_HOST=db
-     /////ESTE APARTADO SE DEBE DE CAMBIAR A SU GUSTO/////
+      # ///// ESTE APARTADO SE DEBE CAMBIAR A SU GUSTO /////
